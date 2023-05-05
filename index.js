@@ -53,6 +53,48 @@ document.querySelector("input").addEventListener('click', (e) => {
 });
 
 
+// End Screen
+const gameoverLoader = () => {
+
+    // creating endscreen div and play again button and high score element
+    const gameOverBanner = document.createElement("div");
+    const gameOverBtn = document.createElement("button");
+    const highScore = document.createElement("div");
+
+    highScore.innerHTML = `High Score : ${
+        localStorage.getItem("highScore")
+           ? localStorage.getItem("highScore")
+           : playerScore
+    }`;
+
+    const oldHighScore = localStorage.getItem("highScore") && localStorage.getItem("highScore");
+
+    if(oldHighScore < playerScore){
+        
+        localStorage.setItem("highScore", playerScore);
+
+        // updating high score html
+        highScore.innerHTML = `High Score: ${playerScore}`;
+    }
+
+    // adding text to playagain button
+    gameOverBtn.innerText = "Play Again";
+
+    gameOverBanner.appendChild(highScore);
+    gameOverBanner.appendChild(gameOverBtn);
+
+    // Making reload on clicking playAgain button
+    gameOverBtn.onclick = () => {
+        window.location.reload();
+    };
+
+    gameOverBanner.classList.add("gameover");
+    document.querySelector("body").appendChild(gameOverBanner);
+
+};
+
+
+
 /* ---------- Creating Player, Enemy, Weapon etc Classes ----------*/
 
 /* context.arc(x, y, radius, Math.PI / 180 * startAngle, Math.PI / 180 * endAngle, anticlockwise); 
@@ -320,6 +362,9 @@ function animation() {
     // Making Recursion
     animationId = requestAnimationFrame(animation);
 
+    // Updating Player Score in Score Board in html
+    scoreBoard.innerHTML = `Score : ${playerScore}`;
+
       // Clearing canvas on each frame
     context.fillStyle = 'rgba(49, 49, 49, 0.2)';  
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -378,6 +423,7 @@ function animation() {
         // Stopping Game if enemy hit player
         if(distanceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1){
            cancelAnimationFrame(animationId);
+           return gameoverLoader();
         }
 
         hugeWeapons.forEach((hugeWeapon) => {
@@ -544,4 +590,14 @@ addEventListener("keypress", (e) => {
   
 });
 
+
+addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+});
+
+addEventListener("resize", () => {
+   window.location.reload();
+});
+
 animation(); 
+
