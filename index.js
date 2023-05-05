@@ -162,12 +162,14 @@ class Enemy {
     update() {
 
         this.draw();
-        (this.x += this.velocity.x), (this.y += this.velocity.y)
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
     }
 }
 
 
 /*-------------- Creating Particle Class  ----------------*/
+const friction = 0.98;
 class Particle {
 
     constructor(x, y, radius, color, velocity){
@@ -176,10 +178,13 @@ class Particle {
         this.radius = radius;
         this.color = color;
         this.velocity = velocity
+        this.alpha = 1;
     }
 
     draw(){
 
+        context.save();
+        context.globalAlpha = this.alpha;
         context.beginPath();     
         context.arc(
             this.x, 
@@ -190,14 +195,20 @@ class Particle {
             false
         );
         context.fillStyle = this.color;
-        
         context.fill();
+        context.restore();
     }
 
     update() {
 
         this.draw();
-        (this.x += this.velocity.x), (this.y += this.velocity.y)
+        // we're decreasing the 1% velocity at each frame
+        this.velocity.x *= friction;
+        this.velocity.y *= friction;
+
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
+        this.alpha -= 0.01;
     }
 }
 
@@ -282,6 +293,17 @@ function animation() {
     // Drawing Player
     abhi.draw();
 
+    // Generating Particles
+    particles.forEach((particle, particleIndex) => {
+        
+        if(particle.alpha <= 0){
+            particles.splice(particleIndex, 1);
+        }else{
+            particle.update();
+        }
+       
+    });
+
     // Generating Bullets
     weapons.forEach((weapon, weaponIndex) => {
         weapon.update();
@@ -320,7 +342,7 @@ function animation() {
             );
 
             if(distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1){
-
+      
             // Reducing size of enemy on hit
                if(enemy.radius > 18){
                 gsap.to(enemy, {
@@ -334,6 +356,15 @@ function animation() {
                }else {
 
                 // Removing enemy on hit if they are below 18
+
+                for(let  i = 0; i < enemy.radius * 3; i++){
+                    particles.push(
+                       new Particle(weapon.x, weapon.y, Math.random() * 2, enemy.color, {
+                          x: (Math.random() - 0.5) * (Math.random() * 7),
+                          y: (Math.random() - 0.5) * (Math.random() * 7)
+                    }));
+                 }
+
                 setTimeout(() => {
                     enemies.splice(enemyIndex, 1);
                     weapons.splice(weaponIndex, 1);
