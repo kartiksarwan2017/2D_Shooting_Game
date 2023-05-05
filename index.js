@@ -13,6 +13,7 @@ const hugeWeaponDamage = 50;
 let difficulty = 2;
 const form = document.querySelector("form");
 const scoreBoard = document.querySelector(".scoreBoard");
+let playerScore = 0;
 
 
 // Basic Functions
@@ -144,7 +145,7 @@ class HugeWeapon {
     constructor(x, y, damage){
         this.x = x;
         this.y = y;
-        this.color = "rgba(47, 255, 0, 1)";
+        this.color = "rgba(245, 27, 212, 1)";
         this.damage = damage;
     }
 
@@ -158,7 +159,7 @@ class HugeWeapon {
     update() {
 
         this.draw();
-        this.x += 10;
+        this.x += 20;
     }
 }
 
@@ -386,12 +387,15 @@ function animation() {
 
             // Removing enemy on hit by the hue weapon
             if(distanceBetweenHugeWeaponAndEnemy <= 200 && distanceBetweenHugeWeaponAndEnemy >= -200){
+
+                // increasing player Score whne killing one enemy
+               playerScore += 10;
+
                setTimeout(() => {
                 enemies.splice(enemyIndex, 1);
                }, 0);
             }
         });
-
 
         weapons.forEach((weapon, weaponIndex) => {
 
@@ -424,6 +428,12 @@ function animation() {
                           y: (Math.random() - 0.5) * (Math.random() * 7)
                     }));
                  }
+
+                 // increasing player Score whne killing one enemy
+                playerScore += 10;
+
+                // Rendering player score in scoreboard html element
+               scoreBoard.innerHTML = `Score : ${playerScore}`;
 
                 setTimeout(() => {
                     enemies.splice(enemyIndex, 1);
@@ -471,7 +481,18 @@ canvas.addEventListener('click', (e) => {
 canvas.addEventListener('contextmenu', (e) => {
     
     e.preventDefault();
-    // console.log(weapons);
+
+    if(playerScore <= 0){
+        return;
+    }
+
+    // Decreasing Player Score for using Heavy Weapon
+    playerScore -= 2;
+    
+    // Rendering player score in scoreboard html element
+    scoreBoard.innerHTML = `Score : ${playerScore}`;
+
+
     // finding angle between player position(center) and click co-ordinates
     const myAngle = Math.atan2(
         e.clientY - canvas.height/2, 
@@ -501,6 +522,17 @@ canvas.addEventListener('contextmenu', (e) => {
 addEventListener("keypress", (e) => {
 
     if(e.key === ' '){
+
+        if(playerScore < 20){
+            return;
+        }
+    
+        // Decreasing Player Score for using Huge Weapon
+        playerScore -= 20;
+        
+        // Rendering player score in scoreboard html element
+        scoreBoard.innerHTML = `Score : ${playerScore}`;
+
         hugeWeapons.push(
             new HugeWeapon(
                 0, 
