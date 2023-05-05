@@ -166,6 +166,42 @@ class Enemy {
     }
 }
 
+
+/*-------------- Creating Particle Class  ----------------*/
+class Particle {
+
+    constructor(x, y, radius, color, velocity){
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.velocity = velocity
+    }
+
+    draw(){
+
+        context.beginPath();     
+        context.arc(
+            this.x, 
+            this.y,
+            this.radius, 
+            Math.PI / 180 * 0, 
+            Math.PI / 180 * 360, 
+            false
+        );
+        context.fillStyle = this.color;
+        
+        context.fill();
+    }
+
+    update() {
+
+        this.draw();
+        (this.x += this.velocity.x), (this.y += this.velocity.y)
+    }
+}
+
+
 /* ----------------------- Main Logic Here -------------------------- */
 
 /* Math.random generates no. from 0 to 1
@@ -178,6 +214,7 @@ const abhi = new Player(playerPosition.x, playerPosition.y, 15, "white");
 weapon we'll push it into the array */
 const weapons = [];
 const enemies = [];
+const particles = [];
 
 /* ------------------ Function To Spawn Enemy at Random Location ------------------ */
 const spawnEnemy = () => {
@@ -249,6 +286,7 @@ function animation() {
     weapons.forEach((weapon, weaponIndex) => {
         weapon.update();
 
+        // Removing weapons if they are off screen
         if(
             weapon.x + weapon.radius < 1 || 
             weapon.y + weapon.radius < 1 || 
@@ -262,16 +300,20 @@ function animation() {
     enemies.forEach((enemy, enemyIndex) => {
         enemy.update();
 
+        // Findind Distance between player and enemy
         const distanceBetweenPlayerAndEnemy = Math.hypot(
             abhi.x - enemy.x, 
             abhi.y - enemy.y
         );
 
+        // Stopping Game if enemy hit player
         if(distanceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1){
            cancelAnimationFrame(animationId);
         }
 
         weapons.forEach((weapon, weaponIndex) => {
+
+            // Finding distance between weapon and enemy
             const distanceBetweenWeaponAndEnemy = Math.hypot(
                 weapon.x - enemy.x, 
                 weapon.y - enemy.y
@@ -279,6 +321,7 @@ function animation() {
 
             if(distanceBetweenWeaponAndEnemy - weapon.radius - enemy.radius < 1){
 
+            // Reducing size of enemy on hit
                if(enemy.radius > 18){
                 gsap.to(enemy, {
                     radius: enemy.radius - 10,
@@ -290,6 +333,7 @@ function animation() {
 
                }else {
 
+                // Removing enemy on hit if they are below 18
                 setTimeout(() => {
                     enemies.splice(enemyIndex, 1);
                     weapons.splice(weaponIndex, 1);
@@ -306,8 +350,7 @@ function animation() {
 // Event Listener for Light Weapon aka left click
 canvas.addEventListener('click', (e) => {
 
-    console.log(weapons);
-
+    // console.log(weapons);
     // finding angle between player position(center) and click co-ordinates
     const myAngle = Math.atan2(
         e.clientY - canvas.height/2, 
