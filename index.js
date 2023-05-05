@@ -7,6 +7,7 @@ canvas.height = innerHeight;
 const context = canvas.getContext("2d");
 const lightWeaponDamage = 10;
 const heavyWeaponDamage = 20;
+const hugeWeaponDamage = 50;
 
 
 let difficulty = 2;
@@ -136,6 +137,34 @@ class Weapon {
 /* ------------------------------------------------ */
 
 
+
+/* ------------------- Creating Huge Weapon Class --------------------*/
+class HugeWeapon {
+
+    constructor(x, y, damage){
+        this.x = x;
+        this.y = y;
+        this.color = "rgba(47, 255, 0, 1)";
+        this.damage = damage;
+    }
+
+    draw(){
+
+        context.beginPath();     
+        context.fillStyle = this.color;    
+        context.fillRect(this.x, this.y, 200, canvas.height); 
+    }
+
+    update() {
+
+        this.draw();
+        this.x += 10;
+    }
+}
+
+/* ------------------------------------------------ */
+
+
 /* ------------ Creating Enemy Class ------------- */
 
 class Enemy {
@@ -229,6 +258,7 @@ const abhi = new Player(playerPosition.x, playerPosition.y, 15, "white");
 /* We have more than one weapons, when we create a new
 weapon we'll push it into the array */
 const weapons = [];
+const hugeWeapons = [];
 const enemies = [];
 const particles = [];
 
@@ -309,6 +339,17 @@ function animation() {
        
     });
 
+    // Generating Huge Weapon
+    hugeWeapons.forEach((hugeWeapon, hugeWeaponIndex) => {
+
+        if(hugeWeapon.x > canvas.width){
+            hugeWeapons.splice(hugeWeaponIndex, 1);
+        }else{
+            hugeWeapon.update();
+        } 
+    });
+
+
     // Generating Bullets
     weapons.forEach((weapon, weaponIndex) => {
         weapon.update();
@@ -337,6 +378,20 @@ function animation() {
         if(distanceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1){
            cancelAnimationFrame(animationId);
         }
+
+        hugeWeapons.forEach((hugeWeapon) => {
+
+            // Finding Distance between Huge weapon and enemy
+            const distanceBetweenHugeWeaponAndEnemy = hugeWeapon.x - enemy.x;
+
+            // Removing enemy on hit by the hue weapon
+            if(distanceBetweenHugeWeaponAndEnemy <= 200 && distanceBetweenHugeWeaponAndEnemy >= -200){
+               setTimeout(() => {
+                enemies.splice(enemyIndex, 1);
+               }, 0);
+            }
+        });
+
 
         weapons.forEach((weapon, weaponIndex) => {
 
@@ -440,6 +495,21 @@ canvas.addEventListener('contextmenu', (e) => {
             heavyWeaponDamage
         )
     );
+});
+
+
+addEventListener("keypress", (e) => {
+
+    if(e.key === ' '){
+        hugeWeapons.push(
+            new HugeWeapon(
+                0, 
+                0, 
+                hugeWeaponDamage
+            )
+        );
+    }
+  
 });
 
 animation(); 
